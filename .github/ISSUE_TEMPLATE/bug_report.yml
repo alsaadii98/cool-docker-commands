@@ -1,0 +1,42 @@
+name: Bug report
+description: Something renders wrong, crashes, or lies about the daemon state
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Paste the command you ran and the output you got.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: dok version
+      description: Output of `dok --version`
+    validations:
+      required: true
+  - type: input
+    id: docker
+    attributes:
+      label: Docker version
+      description: Output of `docker version --format '{{.Server.Version}}'`
+  - type: input
+    id: env
+    attributes:
+      label: OS, terminal and theme
+      placeholder: macOS 15 / Ghostty / --theme nord --icons nerd
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I tried `--icons none --color never` to rule out font or colour issues
+        - label: I checked this is not `docker` itself reporting the same thing

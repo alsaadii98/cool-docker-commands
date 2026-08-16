@@ -1,0 +1,30 @@
+name: Theme submission
+description: Contribute a new built-in theme
+labels: [theme]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Theme name
+    validations:
+      required: true
+  - type: textarea
+    id: palette
+    attributes:
+      label: Palette
+      description: Nine hex colours - green, red, yellow, orange, blue, cyan, magenta, gray, fg
+      render: toml
+    validations:
+      required: true
+  - type: input
+    id: glyphs
+    attributes:
+      label: Glyph set and layout
+      placeholder: unicode + default
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: gray stays readable on the target background
+        - label: red and orange are distinguishable without relying on hue alone

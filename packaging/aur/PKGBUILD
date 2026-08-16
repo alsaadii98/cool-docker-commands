@@ -1,0 +1,34 @@
+# Maintainer: Ali H. Abdulhadi <a.h.alsaady1998@gmail.com>
+pkgname=dok
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Docker output, made readable - what eza is to ls"
+arch=('x86_64' 'aarch64')
+url="https://github.com/alsaadii98/cool-docker-commands"
+license=('MIT')
+depends=('gcc-libs')
+makedepends=('cargo')
+provides=('dok')
+conflicts=('dok-bin')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "cool-docker-commands-$pkgver"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+  cd "cool-docker-commands-$pkgver"
+  export RUSTUP_TOOLCHAIN=stable
+  export CARGO_TARGET_DIR=target
+  cargo build --frozen --release
+}
+
+package() {
+  cd "cool-docker-commands-$pkgver"
+  install -Dm0755 "target/release/dok" "$pkgdir/usr/bin/dok"
+  install -Dm0644 "LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm0644 "README.md" "$pkgdir/usr/share/doc/$pkgname/README.md"
+}
