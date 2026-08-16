@@ -22,7 +22,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # enablement lets the first run turn Pages on itself, instead of
       # failing with "Get Pages site failed" until someone flips the setting.
       - uses: actions/configure-pages@v5
