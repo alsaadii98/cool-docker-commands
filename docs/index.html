@@ -3,165 +3,329 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>cool-docker-commands — dok</title>
-<meta name="description" content="cool-docker-commands ships dok: a Rust CLI that renders docker's output for humans. Colour, compose grouping, human sizes and ages, and themes.">
-<meta property="og:title" content="cool-docker-commands — dok">
-<meta property="og:description" content="Docker output, made readable. What eza is to ls.">
+<title>dok — pretty docker ps, images, inspect &amp; logs | cool-docker-commands</title>
+<meta name="description" content="dok is a fast Rust CLI that makes docker ps, docker images, docker inspect, docker logs and docker system df human-readable: colour, icons, compose-project grouping, human sizes and ages, and 10 themes.">
+<meta name="keywords" content="docker, docker cli, docker ps, pretty docker ps, docker images, docker inspect, docker logs, docker stats, docker system df, docker compose, container management, rust cli, terminal tool, tui, eza, lazydocker alternative, ctop alternative, dive alternative, devops tools, sysadmin, colorized output, themes">
+<meta name="author" content="Ali H. Abdulhadi (@alsaadii98)">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<link rel="canonical" href="https://alsaadii98.github.io/cool-docker-commands/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="cool-docker-commands">
+<meta property="og:title" content="dok — docker output, made readable">
+<meta property="og:description" content="A Rust CLI that renders docker ps, images, inspect, logs and disk usage for humans. Compose grouping, human sizes and ages, and themes that change glyphs and layout.">
+<meta property="og:url" content="https://alsaadii98.github.io/cool-docker-commands/">
 <meta property="og:image" content="https://alsaadii98.github.io/cool-docker-commands/img/ps.svg">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2311141b'/><circle cx='50' cy='50' r='21' fill='%2398c379'/></svg>">
+<meta property="og:image:alt" content="dok ps output: containers grouped by compose project with coloured state dots, ports and ages">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="dok — docker output, made readable">
+<meta name="twitter:description" content="What eza is to ls, for docker. Colour, compose grouping, human sizes and ages, 10 themes. One Rust binary.">
+<meta name="twitter:image" content="https://alsaadii98.github.io/cool-docker-commands/img/ps.svg">
+
+<!-- Structured data: the software itself -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "dok (cool-docker-commands)",
+  "alternateName": "cool-docker-commands",
+  "applicationCategory": "DeveloperApplication",
+  "applicationSubCategory": "Command Line Utility",
+  "operatingSystem": "macOS, Linux, Windows",
+  "description": "A Rust CLI that renders docker ps, images, inspect, logs, disk usage, events and stats for humans: colour, icons, compose-project grouping, human sizes and ages, and themes.",
+  "url": "https://alsaadii98.github.io/cool-docker-commands/",
+  "downloadUrl": "https://github.com/alsaadii98/cool-docker-commands/releases",
+  "codeRepository": "https://github.com/alsaadii98/cool-docker-commands",
+  "programmingLanguage": "Rust",
+  "license": "https://opensource.org/licenses/MIT",
+  "softwareVersion": "0.1.0",
+  "keywords": "docker, cli, containers, docker ps, docker inspect, docker logs, rust, terminal, themes",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": {
+    "@type": "Person",
+    "name": "Ali H. Abdulhadi",
+    "url": "https://github.com/alsaadii98"
+  }
+}
+</script>
+
+<!-- Structured data: the questions people actually search -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I make docker ps output readable?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Run dok ps. It reads the Docker socket directly and prints containers grouped by compose project with coloured state dots, health marks, short ids, published ports and relative ages, sized to your terminal width."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there a readable alternative to docker inspect?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "dok inspect folds the inspect JSON into identity, state, config, resources, network, mounts and labels, masks credential-looking environment values by default, and highlights privileged mode, added capabilities, OOM kills and failing healthchecks."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is dok different from lazydocker or ctop?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "lazydocker and ctop are full-screen TUIs you drive interactively. dok prints one static, pipeable screen per command and is read-only: it never starts, stops, execs into or removes containers."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I install dok?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "brew install alsaadii98/tap/dok, cargo install dok-cli, paru -S dok-bin on Arch, the .deb or .rpm from the releases page, nix run github:alsaadii98/cool-docker-commands, or scoop install dok on Windows."
+      }
+    }
+  ]
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0c0f15;
-  --card:#141821;
-  --line:#222836;
-  --fg:#c3c9d5;
-  --head:#ffffff;
-  --mute:#6a7382;
+  --bg:#000;
+  --card:#0a0a0a;
+  --card-2:#0f0f0f;
+  --line:#1f1f1f;
+  --line-2:#2e2e2e;
+  --fg:#a1a1a1;
+  --head:#ededed;
   --green:#98c379;
   --blue:#61afef;
   --yellow:#e5c07b;
   --red:#e06c75;
   --magenta:#c678dd;
   --cyan:#56b6c2;
-  --r:14px;
+  --sans:"Geist",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:12px;
 }
 *{box-sizing:border-box}
+html{scroll-behavior:smooth}
 body{
   margin:0;background:var(--bg);color:var(--fg);
-  font:15px/1.6 "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
-  -webkit-font-smoothing:antialiased;
+  font:15px/1.6 var(--sans);letter-spacing:-.01em;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
 }
-a{color:var(--blue);text-decoration:none}
-a:hover{text-decoration:underline;text-underline-offset:3px}
-code{color:var(--green)}
-.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+a{color:inherit;text-decoration:none}
+code,.mono{font-family:var(--mono);font-size:.92em}
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
 
-/* header */
-header{border-bottom:1px solid var(--line)}
-header .wrap{display:flex;align-items:center;gap:20px;height:56px;font-size:13.5px}
-.brand{color:var(--head);font-weight:700}
-.brand b{color:var(--green)}
-header nav{margin-left:auto;display:flex;gap:18px}
-header nav a{color:var(--mute)}
-header nav a:hover{color:var(--fg);text-decoration:none}
+/* ── ambient background: grid + slow drifting glow ── */
+.bg{position:fixed;inset:0;z-index:-1;pointer-events:none}
+.bg .grid{
+  position:absolute;inset:-2px;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(120% 80% at 50% 0%,#000 20%,transparent 75%);
+  opacity:.5;
+}
+.bg .glow{
+  position:absolute;left:50%;top:-340px;width:900px;height:640px;transform:translateX(-50%);
+  background:radial-gradient(closest-side,rgba(152,195,121,.14),transparent 70%);
+  filter:blur(20px);animation:drift 16s ease-in-out infinite alternate;
+}
+@keyframes drift{from{transform:translateX(-56%) scale(1)}to{transform:translateX(-44%) scale(1.12)}}
 
-/* hero */
-.hero{padding:56px 0 30px;text-align:center}
-h1{font-size:clamp(28px,5vw,42px);color:var(--head);margin:0;font-weight:700;letter-spacing:-.01em}
-h1 span{color:var(--green)}
-.sub{color:var(--mute);margin:12px auto 0;max-width:60ch}
-.actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:24px}
+/* ── nav ── */
+header{position:sticky;top:0;z-index:30;backdrop-filter:blur(12px);
+  background:rgba(0,0,0,.72);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;gap:20px;height:60px}
+.brand{color:var(--head);font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:9px}
+.brand .led{width:9px;height:9px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 0 0 rgba(152,195,121,.6);animation:pulse 2.6s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(152,195,121,.55)}70%{box-shadow:0 0 0 9px rgba(152,195,121,0)}100%{box-shadow:0 0 0 0 rgba(152,195,121,0)}}
+.brand small{color:#555;font-weight:400}
+header nav{margin-left:auto;display:flex;gap:6px;font-size:13.5px}
+header nav a{color:var(--fg);padding:7px 11px;border-radius:8px;transition:background .16s,color .16s}
+header nav a:hover{color:var(--head);background:#111}
+.gh{border:1px solid var(--line);border-radius:8px;padding:7px 13px!important}
+.gh:hover{border-color:var(--line-2)}
+
+/* ── hero ── */
+.hero{padding:104px 0 56px;text-align:center;position:relative}
+.pill{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);
+  border-radius:999px;padding:5px 13px;font-size:12.5px;color:var(--fg);background:#080808}
+.pill b{color:var(--head);font-weight:500}
+h1{
+  margin:22px 0 0;font-size:clamp(38px,7.4vw,78px);line-height:1.02;font-weight:600;
+  letter-spacing:-.045em;color:var(--head);
+  background:linear-gradient(180deg,#fff 30%,#8d8d8d);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+h1 em{font-style:normal;
+  background:linear-gradient(90deg,var(--green),var(--cyan) 60%,var(--blue));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.sub{margin:20px auto 0;max-width:60ch;font-size:17px;color:var(--fg)}
+.sub code{color:var(--head)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:30px}
 .copy,.ghost{
-  display:inline-flex;align-items:center;gap:12px;border:1px solid var(--line);
-  border-radius:10px;padding:11px 16px;background:var(--card);color:var(--fg);
-  font:inherit;font-size:13.5px;cursor:pointer;transition:border-color .15s,color .15s;
+  display:inline-flex;align-items:center;gap:12px;border-radius:10px;padding:11px 16px;
+  font:inherit;font-size:13.5px;cursor:pointer;transition:transform .16s,border-color .16s,background .16s,color .16s;
 }
-.copy:hover,.ghost:hover{border-color:#39414f;text-decoration:none;color:var(--head)}
-.copy .tag{color:var(--mute);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.copy{border:1px solid var(--line);background:var(--card);color:var(--head);font-family:var(--mono)}
+.copy:hover{border-color:var(--line-2);transform:translateY(-1px)}
+.copy .tag{color:#555;font-family:var(--sans);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.ghost{border:1px solid transparent;background:var(--head);color:#000;font-weight:500}
+.ghost:hover{transform:translateY(-1px);background:#fff}
+.ghost.alt{background:transparent;border-color:var(--line);color:var(--head)}
+.ghost.alt:hover{border-color:var(--line-2);background:#0c0c0c}
 
-/* bento */
-.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;padding:20px 0 40px}
-.box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;grid-column:span 3}
-.box.wide{grid-column:span 6}
-.box.half{grid-column:span 3}
-.box.third{grid-column:span 2}
-.box h2{font-size:14px;color:var(--head);margin:0 0 4px;font-weight:700}
-.box p.k{color:var(--mute);font-size:13px;margin:0 0 14px}
-.box.shot{padding:0;overflow:hidden}
+/* ── bento ── */
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;padding:26px 0 56px}
+.box{
+  position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:22px;grid-column:span 3;overflow:hidden;transition:border-color .2s,transform .2s;
+}
+.box:hover{border-color:var(--line-2);transform:translateY(-2px)}
+/* cursor spotlight */
+.box::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .25s;
+  background:radial-gradient(360px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.055),transparent 40%);
+}
+.box:hover::before{opacity:1}
+.wide{grid-column:span 6}
+.half{grid-column:span 3}
+.third{grid-column:span 2}
+.box h2{font-size:15px;color:var(--head);margin:0 0 5px;font-weight:600;letter-spacing:-.02em}
+.box p.k{color:#6f6f6f;font-size:13.5px;margin:0 0 16px}
+.box.shot{padding:0}
 .box.shot img{display:block;width:100%;height:auto}
-.box.shot figcaption{padding:12px 18px;border-top:1px solid var(--line);color:var(--mute);font-size:12.5px}
+.box.shot figcaption{padding:13px 18px;border-top:1px solid var(--line);color:#6f6f6f;font-size:12.5px}
+.box.shot figcaption b{color:var(--head);font-weight:500;font-family:var(--mono)}
 
-/* command list */
-ul.cmd{list-style:none;margin:0;padding:0;font-size:13.5px}
-ul.cmd li{display:flex;gap:12px;padding:7px 0;border-bottom:1px dashed #1c2130}
-ul.cmd li:last-child{border-bottom:0}
-ul.cmd b{color:var(--green);font-weight:500;min-width:118px}
-ul.cmd span{color:var(--mute)}
+/* lists */
+ul.rows{list-style:none;margin:0;padding:0;font-size:13.5px}
+ul.rows li{display:flex;gap:14px;padding:8px 0;border-bottom:1px solid #141414;transition:padding-left .18s}
+ul.rows li:last-child{border-bottom:0}
+ul.rows li:hover{padding-left:5px}
+ul.rows b{color:var(--head);font-weight:400;font-family:var(--mono);min-width:120px}
+ul.rows span{color:#6f6f6f}
 
 /* code */
-pre{margin:0;background:#0f131b;border:1px solid var(--line);border-radius:10px;
-  padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.7;color:var(--fg)}
-pre .c{color:var(--mute)}
+pre{margin:0;background:#060606;border:1px solid var(--line);border-radius:10px;
+  padding:15px 17px;overflow-x:auto;font-family:var(--mono);font-size:12.8px;line-height:1.75;color:#d4d4d4}
+pre .c{color:#5a5a5a}
 pre .p{color:var(--green)}
 
-/* install tabs */
-.tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
-.tab{border:1px solid var(--line);background:transparent;color:var(--mute);border-radius:8px;
-  padding:6px 12px;font:inherit;font-size:12.5px;cursor:pointer}
-.tab:hover{color:var(--fg)}
-.tab[aria-selected=true]{background:var(--green);border-color:var(--green);color:#0c0f15;font-weight:700}
+/* tabs */
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:13px}
+.tab{border:1px solid var(--line);background:transparent;color:#7d7d7d;border-radius:8px;
+  padding:6px 12px;font:inherit;font-size:12.5px;cursor:pointer;transition:.16s}
+.tab:hover{color:var(--head);border-color:var(--line-2)}
+.tab[aria-selected=true]{background:var(--head);border-color:var(--head);color:#000;font-weight:500}
+.panel{animation:fade .28s ease both}
 .panel[hidden]{display:none}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
 /* theme chips */
-.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-.chip{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-.chip .n{font-size:12.5px;color:var(--head)}
-.chip .s{display:flex;gap:3px;margin-top:7px}
-.chip .s i{height:12px;flex:1;border-radius:2px}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px}
+.chip{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--card-2);transition:.18s}
+.chip:hover{border-color:var(--line-2);transform:translateY(-2px)}
+.chip .n{font-size:12.5px;color:var(--head);font-family:var(--mono)}
+.chip .s{display:flex;gap:3px;margin-top:8px}
+.chip .s i{height:13px;flex:1;border-radius:3px;transition:transform .18s}
+.chip:hover .s i{transform:scaleY(1.35)}
 
-/* stats row */
-.nums{display:flex;gap:26px;flex-wrap:wrap}
-.num b{display:block;color:var(--head);font-size:22px;line-height:1.2}
-.num span{color:var(--mute);font-size:12px}
+/* stat counters */
+.nums{display:flex;gap:30px;flex-wrap:wrap;margin-top:18px}
+.num b{display:block;color:var(--head);font-size:26px;line-height:1.15;font-weight:600;letter-spacing:-.03em}
+.num span{color:#6f6f6f;font-size:12px}
 
-footer{border-top:1px solid var(--line);padding:22px 0 44px;color:var(--mute);font-size:13px}
-footer .wrap{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+footer{border-top:1px solid var(--line);padding:26px 0 52px;color:#6f6f6f;font-size:13px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+footer a:hover{color:var(--head)}
 footer .sp{margin-left:auto}
 
-@media(max-width:820px){
+/* ── entrance + scroll reveal ── */
+[data-anim]{opacity:0;transform:translateY(16px)}
+[data-anim].in{opacity:1;transform:none;
+  transition:opacity .6s cubic-bezier(.22,.7,.3,1),transform .6s cubic-bezier(.22,.7,.3,1)}
+@media (prefers-reduced-motion:reduce){
+  [data-anim],[data-anim].in{opacity:1;transform:none;transition:none}
+  .bg .glow,.brand .led{animation:none}
+  *{transition:none!important}
+}
+@media(max-width:860px){
   .bento{grid-template-columns:repeat(2,1fr)}
-  .box,.box.wide,.box.half,.box.third{grid-column:span 2}
+  .box,.wide,.half,.third{grid-column:span 2}
+  .hero{padding:72px 0 36px}
 }
 </style>
 </head>
 <body>
 
+<div class="bg"><div class="grid"></div><div class="glow"></div></div>
+
 <header>
   <div class="wrap">
-    <span class="brand">cool-docker-commands <b>/ dok</b></span>
+    <a class="brand" href="#top"><span class="led"></span>cool-docker-commands <small>/ dok</small></a>
     <nav>
-      <a href="#install">install</a>
       <a href="#commands">commands</a>
       <a href="#themes">themes</a>
-      <a href="https://github.com/alsaadii98/cool-docker-commands">github</a>
+      <a href="#install">install</a>
+      <a class="gh" href="https://github.com/alsaadii98/cool-docker-commands">GitHub ↗</a>
     </nav>
   </div>
 </header>
 
-<div class="wrap">
-  <div class="hero">
-    <h1>docker output, made <span>readable</span></h1>
-    <p class="sub">
-      <code>cool-docker-commands</code> ships one binary — <code>dok</code>. It reads the Docker
-      socket and prints it for humans: colour that means something, compose grouping,
-      human sizes and ages, and themes. What <a href="https://eza.rocks/">eza</a> is to <code>ls</code>.
+<main class="wrap" id="top">
+
+  <section class="hero">
+    <span class="pill" data-anim style="transition-delay:.03s">
+      <b>v0.1</b> · Rust · reads the docker socket · MIT
+    </span>
+    <h1 data-anim style="transition-delay:.08s">Docker output,<br>made <em>readable</em>.</h1>
+    <p class="sub" data-anim style="transition-delay:.14s">
+      <code>cool-docker-commands</code> ships one binary — <code>dok</code>. It reads the
+      Docker socket and prints it for humans: colour that means something, compose
+      grouping, human sizes and ages, and real themes.
+      What <a href="https://eza.rocks/" style="color:var(--head);text-decoration:underline;text-underline-offset:3px">eza</a> is to <code>ls</code>.
     </p>
-    <div class="actions">
+    <div class="actions" data-anim style="transition-delay:.2s">
       <button class="copy" data-copy="brew install alsaadii98/tap/dok">
         <span><span style="color:var(--green)">$</span> brew install alsaadii98/tap/dok</span>
         <span class="tag">copy</span>
       </button>
-      <a class="ghost" href="#install">other ways</a>
-      <a class="ghost" href="https://github.com/alsaadii98/cool-docker-commands">source ↗</a>
+      <a class="ghost" href="#install">Install</a>
+      <a class="ghost alt" href="https://github.com/alsaadii98/cool-docker-commands">Source</a>
     </div>
-  </div>
+  </section>
 
   <div class="bento">
 
-    <figure class="box wide shot" style="margin:0">
+    <figure class="box wide shot" style="margin:0" data-anim>
       <img src="img/ps.svg" alt="dok ps -a output with containers grouped by compose project">
-      <figcaption><b style="color:var(--fg)">dok ps -a</b> — grouped by compose project, with ids, state, health, ports and ages.</figcaption>
+      <figcaption><b>dok ps -a</b> — grouped by compose project, with ids, state, health, ports and ages.</figcaption>
     </figure>
 
-    <div class="box half" id="commands">
-      <h2>ten commands</h2>
+    <div class="box half" id="commands" data-anim>
+      <h2>Ten commands</h2>
       <p class="k">One static screen each. Pipes like any Unix tool.</p>
-      <ul class="cmd">
+      <ul class="rows">
         <li><b>dok ps</b><span>containers, grouped by project</span></li>
-        <li><b>dok images</b><span>size + age gradients</span></li>
+        <li><b>dok images</b><span>size and age gradients</span></li>
         <li><b>dok df</b><span>disk usage, reclaimable bars</span></li>
         <li><b>dok inspect</b><span>the JSON, folded and masked</span></li>
         <li><b>dok logs</b><span>merged tail, level colouring</span></li>
@@ -173,41 +337,41 @@ footer .sp{margin-left:auto}
       </ul>
     </div>
 
-    <div class="box half">
-      <h2>why it exists</h2>
+    <div class="box half" data-anim>
+      <h2>Why it exists</h2>
       <p class="k">Same data, rendered for a human instead of a parser.</p>
-      <ul class="cmd">
+      <ul class="rows">
         <li><b>read-only</b><span>no start, stop, exec or rm — ever</span></li>
         <li><b>no shell-out</b><span>talks to the socket directly</span></li>
-        <li><b>one binary</b><span>no runtime, no daemon of its own</span></li>
+        <li><b>one binary</b><span>no runtime, nothing to daemonise</span></li>
         <li><b>ci-safe</b><span>colour and icons off when piped</span></li>
         <li><b>themable</b><span>palette, glyphs and layout</span></li>
-        <li><b>demo mode</b><span><code>dok ps --demo</code> with no daemon</span></li>
+        <li><b>demo mode</b><span><code>dok ps --demo</code>, no daemon needed</span></li>
       </ul>
-      <div class="nums" style="margin-top:16px">
-        <div class="num"><b>10</b><span>commands</span></div>
-        <div class="num"><b>10</b><span>themes</span></div>
-        <div class="num"><b>0</b><span>runtime deps</span></div>
+      <div class="nums">
+        <div class="num"><b data-count="10">0</b><span>commands</span></div>
+        <div class="num"><b data-count="10">0</b><span>themes</span></div>
+        <div class="num"><b data-count="0">0</b><span>runtime deps</span></div>
       </div>
     </div>
 
-    <figure class="box third shot" style="margin:0">
+    <figure class="box third shot" style="margin:0" data-anim>
       <img src="img/df.svg" alt="dok df disk usage bars" loading="lazy">
-      <figcaption><b style="color:var(--fg)">dok df</b> — what to prune.</figcaption>
+      <figcaption><b>dok df</b> — what to prune.</figcaption>
     </figure>
 
-    <figure class="box third shot" style="margin:0">
+    <figure class="box third shot" style="margin:0" data-anim>
       <img src="img/tree.svg" alt="dok tree of projects, networks and volumes" loading="lazy">
-      <figcaption><b style="color:var(--fg)">dok tree</b> — how it wires up.</figcaption>
+      <figcaption><b>dok tree</b> — how it wires up.</figcaption>
     </figure>
 
-    <figure class="box third shot" style="margin:0">
+    <figure class="box third shot" style="margin:0" data-anim>
       <img src="img/inspect.svg" alt="dok inspect folded into sections" loading="lazy">
-      <figcaption><b style="color:var(--fg)">dok inspect</b> — secrets masked.</figcaption>
+      <figcaption><b>dok inspect</b> — secrets masked.</figcaption>
     </figure>
 
-    <div class="box wide" id="install">
-      <h2>install</h2>
+    <div class="box wide" id="install" data-anim>
+      <h2>Install</h2>
       <p class="k">One binary, no runtime dependencies. Needs a reachable Docker daemon — it honours <code>DOCKER_HOST</code>, the default socket and Windows named pipes.</p>
       <div class="tabs" role="tablist">
         <button class="tab" role="tab" aria-selected="true" data-panel="brew">homebrew</button>
@@ -234,9 +398,9 @@ footer .sp{margin-left:auto}
 <span class="p">$</span> cd cool-docker-commands && cargo build --release</pre></div>
     </div>
 
-    <div class="box half" id="themes">
-      <h2>themes</h2>
-      <p class="k">Palette, glyph set and layout — not just colour. The <code>ascii</code> theme is pure ASCII.</p>
+    <div class="box half" id="themes" data-anim>
+      <h2>Themes</h2>
+      <p class="k">Palette, glyph set and layout — not just colour. The <code>ascii</code> theme is genuinely ASCII.</p>
       <div class="chips">
         <div class="chip"><div class="n">default</div><div class="s"><i style="background:#98c379"></i><i style="background:#56b6c2"></i><i style="background:#61afef"></i><i style="background:#c678dd"></i><i style="background:#e5c07b"></i><i style="background:#e06c75"></i></div></div>
         <div class="chip"><div class="n">dracula</div><div class="s"><i style="background:#50fa7b"></i><i style="background:#8be9fd"></i><i style="background:#bd93f9"></i><i style="background:#ff79c6"></i><i style="background:#f1fa8c"></i><i style="background:#ff5555"></i></div></div>
@@ -251,40 +415,89 @@ footer .sp{margin-left:auto}
       </div>
     </div>
 
-    <div class="box half">
-      <h2>configure</h2>
+    <div class="box half" data-anim>
+      <h2>Configure</h2>
       <p class="k"><code>dok themes --init</code> writes this to <code>~/.config/dok/config.toml</code>.</p>
 <pre>theme = "mine"
 icons = "nerd"        <span class="c"># auto | nerd | unicode | none</span>
 
 [themes.mine]
-base = "gruvbox"      <span class="c"># any built-in</span>
+base   = "gruvbox"    <span class="c"># any built-in</span>
 glyphs = "heavy"      <span class="c"># unicode|ascii|heavy|slim</span>
-layout = "grid"       <span class="c"># default|ruled|grid|quiet|ascii</span>
+layout = "grid"       <span class="c"># default|ruled|grid|quiet</span>
 header = "dim"        <span class="c"># underline|bold|dim|caps</span>
 green  = "#00ff00"    <span class="c"># override any role</span></pre>
-      <p class="k" style="margin:12px 0 0">Or just: <code>dok ps --theme nord</code></p>
+      <p class="k" style="margin:14px 0 0">Or just <code>dok ps --theme nord</code>.</p>
     </div>
 
-    <figure class="box wide shot" style="margin:0">
+    <figure class="box wide shot" style="margin:0" data-anim>
       <img src="img/logs.svg" alt="dok logs merged and colour-coded" loading="lazy">
-      <figcaption><b style="color:var(--fg)">dok logs</b> — one stable colour per container, stderr marked on the separator, JSON exploded into <code>level msg key=value</code>.</figcaption>
+      <figcaption><b>dok logs</b> — one stable colour per container, stderr marked on the separator, JSON exploded into <code>level msg key=value</code>.</figcaption>
     </figure>
 
   </div>
-</div>
+</main>
 
 <footer>
   <div class="wrap">
-    <span>MIT - Built by <a href="https://github.com/alsaadii98">@alsaadii98</a></span>
-    <a href="https://github.com/alsaadii98/cool-docker-commands">github</a>
+    <span>MIT - Built by <a href="https://github.com/alsaadii98" style="color:var(--head)">@alsaadii98</a></span>
+    <a href="https://github.com/alsaadii98/cool-docker-commands">GitHub</a>
     <a href="https://crates.io/crates/dok-cli">crates.io</a>
-    <a href="https://github.com/alsaadii98/cool-docker-commands/blob/main/ROADMAP.md">roadmap</a>
-    <span class="sp">built with <a href="https://github.com/fussybeaver/bollard">bollard</a> + <a href="https://ratatui.rs">ratatui</a></span>
+    <a href="https://github.com/alsaadii98/cool-docker-commands/blob/main/ROADMAP.md">Roadmap</a>
+    <span class="sp">built with <a href="https://github.com/fussybeaver/bollard" style="color:var(--head)">bollard</a> + <a href="https://ratatui.rs" style="color:var(--head)">ratatui</a></span>
   </div>
 </footer>
 
 <script>
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Reveal on scroll, staggered within each grid row.
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (!entry.isIntersecting) return;
+    entry.target.style.transitionDelay =
+      entry.target.style.transitionDelay || `${Math.min(i, 5) * 60}ms`;
+    entry.target.classList.add('in');
+    io.unobserve(entry.target);
+  });
+}, { rootMargin: '0px 0px -8% 0px', threshold: .08 });
+
+document.querySelectorAll('[data-anim]').forEach(el => {
+  if (reduced) { el.classList.add('in'); return; }
+  io.observe(el);
+});
+
+// Cursor spotlight inside cards.
+if (!reduced) {
+  document.querySelectorAll('.box').forEach(box => {
+    box.addEventListener('pointermove', e => {
+      const r = box.getBoundingClientRect();
+      box.style.setProperty('--mx', `${e.clientX - r.left}px`);
+      box.style.setProperty('--my', `${e.clientY - r.top}px`);
+    });
+  });
+}
+
+// Count up the stat tiles once they scroll into view.
+const counters = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const el = entry.target;
+    const target = Number(el.dataset.count);
+    counters.unobserve(el);
+    if (reduced || target === 0) { el.textContent = String(target); return; }
+    let n = 0;
+    const step = () => {
+      n += Math.max(1, Math.ceil(target / 14));
+      el.textContent = String(Math.min(n, target));
+      if (n < target) requestAnimationFrame(step);
+    };
+    step();
+  });
+}, { threshold: 1 });
+document.querySelectorAll('[data-count]').forEach(el => counters.observe(el));
+
+// Install tabs.
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t === tab)));
@@ -292,6 +505,7 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
+// Click-to-copy.
 document.querySelectorAll('[data-copy]').forEach(el => {
   const tag = el.querySelector('.tag');
   el.addEventListener('click', async () => {
