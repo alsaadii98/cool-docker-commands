@@ -160,14 +160,14 @@ jobs:
           cargo publish --locked --token "$TOKEN"
 
   homebrew:
-    name: bump homebrew tap
+    name: update homebrew tap
     needs: release
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
-      # Requires a HOMEBREW_TAP_TOKEN secret with write access to the tap repo.
-      # Without it the job succeeds and does nothing, so the release is never
-      # blocked on packaging.
+      # Requires a HOMEBREW_TAP_TOKEN secret with contents:write on the tap
+      # repo. Without it the job succeeds and does nothing, so packaging can
+      # never block a release.
       - name: Check for tap token
         env:
           TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
@@ -175,16 +175,38 @@ jobs:
           if [ -n "$TOKEN" ]; then
             echo "HAS_TOKEN=true" >> "$GITHUB_ENV"
           else
-            echo "HOMEBREW_TAP_TOKEN not set — skipping tap bump"
+            echo "HOMEBREW_TAP_TOKEN not set — skipping tap update"
             echo "HAS_TOKEN=false" >> "$GITHUB_ENV"
           fi
 
-      - uses: mislav/bump-homebrew-formula-action@v3
+      - uses: actions/checkout@v4
         if: env.HAS_TOKEN == 'true'
-        env:
-          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+      - name: Check out the tap
+        if: env.HAS_TOKEN == 'true'
+        uses: actions/checkout@v4
         with:
-          formula-name: dok
-          formula-path: Formula/dok.rb
-          homebrew-tap: alsaadii98/homebrew-tap
-          download-url: https://github.com/alsaadii98/cool-docker-commands/archive/refs/tags/${{ github.ref_name }}.tar.gz
+          repository: alsaadii98/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+
+      - name: Regenerate the formula from the release checksums
+        if: env.HAS_TOKEN == 'true'
+        run: |
+          mkdir -p tap/Formula
+          ./scripts/gen-formula.sh "${GITHUB_REF_NAME}" > tap/Formula/dok.rb
+          cat tap/Formula/dok.rb
+
+      - name: Commit and push
+        if: env.HAS_TOKEN == 'true'
+        working-directory: tap
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "formula already up to date"
+            exit 0
+          fi
+          git add Formula/dok.rb
+          git commit -m "dok ${GITHUB_REF_NAME#v}"
+          git push
