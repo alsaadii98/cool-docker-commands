@@ -35,7 +35,12 @@ pub async fn run(wanted: Vec<String>, ps_args: Option<String>, flat: bool) -> Re
         if i > 0 {
             println!();
         }
-        let top = match docker.top_processes(name, Some(opts.clone())).await {
+        let top = if crate::demo::enabled() {
+            Ok(crate::demo::top(name))
+        } else {
+            docker.top_processes(name, Some(opts.clone())).await
+        };
+        let top = match top {
             Ok(t) => t,
             Err(e) => {
                 println!("{} {}", cb(name, theme::hash_color(name)), c(&format!("· {e}"), p().red));

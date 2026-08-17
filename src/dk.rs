@@ -11,11 +11,13 @@ pub const COMPOSE_PROJECT: &str = "com.docker.compose.project";
 pub const COMPOSE_SERVICE: &str = "com.docker.compose.service";
 
 pub fn connect() -> Result<Docker> {
-    // Demo mode never talks to a daemon, but the commands still expect a
-    // client value; an unconnected one is fine since no request is made.
+    // Demo mode answers every query from fixtures, but the commands still need
+    // a client value to pass around. Build an HTTP one pointed at a dead port:
+    // it constructs without touching the filesystem, so `--demo` works on a
+    // machine that has no docker socket at all.
     if crate::demo::enabled() {
-        return Ok(Docker::connect_with_defaults()
-            .unwrap_or_else(|_| Docker::connect_with_local_defaults().expect("demo client")));
+        return Docker::connect_with_http("http://127.0.0.1:1", 1, bollard::API_DEFAULT_VERSION)
+            .context("building the offline demo client");
     }
     Docker::connect_with_defaults()
         .context("cannot reach the docker daemon (is it running? check DOCKER_HOST)")

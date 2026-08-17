@@ -472,6 +472,39 @@ pub fn inspect(_name: &str) -> ContainerInspectResponse {
     }
 }
 
+/// `ps` output as the daemon would return it, for `dok top --demo`.
+pub fn top(name: &str) -> ContainerTopResponse {
+    let titles = ["PID", "PPID", "USER", "%CPU", "%MEM", "ELAPSED", "COMMAND"]
+        .iter()
+        .map(|t| t.to_string())
+        .collect();
+    let row = |p: &str, pp: &str, u: &str, c: &str, m: &str, cmd: &str| {
+        vec![p, pp, u, c, m, "03:11:47", cmd].into_iter().map(String::from).collect::<Vec<_>>()
+    };
+    let processes = match name {
+        n if n.contains("postgres") => vec![
+            row("667", "620", "70", "0.0", "0.3", "postgres"),
+            row("759", "667", "70", "0.0", "0.1", "postgres: checkpointer"),
+            row("760", "667", "70", "0.0", "0.1", "postgres: background writer"),
+            row("762", "667", "70", "0.1", "0.2", "postgres: walwriter"),
+            row("764", "667", "70", "0.0", "0.1", "postgres: autovacuum launcher"),
+        ],
+        n if n.contains("redis") => {
+            vec![row("666", "619", "999", "1.4", "0.1", "redis-server *:6379")]
+        }
+        n if n.contains("web") => vec![
+            row("701", "688", "root", "0.0", "0.1", "nginx: master process nginx -g daemon off;"),
+            row("742", "701", "nginx", "0.2", "0.1", "nginx: worker process"),
+            row("743", "701", "nginx", "0.1", "0.1", "nginx: worker process"),
+        ],
+        _ => vec![
+            row("21874", "21850", "node", "2.1", "1.8", "node dist/server.js"),
+            row("21902", "21874", "node", "0.4", "0.6", "node dist/worker.js --queue=email"),
+        ],
+    };
+    ContainerTopResponse { titles: Some(titles), processes: Some(processes) }
+}
+
 /// Interleaved log lines, already in docker's `<rfc3339> <message>` shape.
 pub fn logs() -> Vec<(&'static str, &'static str, bool)> {
     vec![

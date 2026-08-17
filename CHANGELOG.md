@@ -6,6 +6,22 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-08-17
+
+### Fixed
+
+- `--demo` panicked with `SocketNotFoundError` on machines with no Docker
+  socket, which was the one case it exists to serve. It now builds an offline
+  client instead of probing the filesystem.
+- `dok top --demo` printed a daemon error per container; it now has fixtures
+  like every other demo command.
+
+### Changed
+
+- Homebrew installs a prebuilt binary instead of compiling from source, so it
+  no longer pulls rust, llvm, z3 and python. `brew install --HEAD` still builds
+  from source.
+
 ## [0.1.0] - 2026-08-17
 
 First public release.
@@ -34,5 +50,6 @@ First public release.
 - `--demo` on every command: renders a built-in example stack with no daemon,
   and is what generates the screenshots in the docs.
 
-[Unreleased]: https://github.com/alsaadii98/cool-docker-commands/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/alsaadii98/cool-docker-commands/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/alsaadii98/cool-docker-commands/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/alsaadii98/cool-docker-commands/releases/tag/v0.1.0
